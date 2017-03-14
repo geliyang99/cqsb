@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context-3.0.xsd
+           http://www.springframework.org/schema/aop
+           http://www.springframework.org/schema/aop/spring-aop.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+           
+    <context:component-scan base-package="cqsb.sycj.dao.impl.*"/>
+    <!-- 文件加载器，加载类路径下的配置文件jdbc.properties -->
+    <context:property-placeholder location="classpath:jdbc.properties" />
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close"
+          p:driverClassName="${jdbc.driverClassName}"
+          p:url="${jdbc.url}"
+          p:username="${jdbc.username}"
+          p:password="${jdbc.password}"
+          p:maxIdle= "${jdbc.maxIdle}"
+          p:initialSize="${jdbc.initialSize}"
+          p:minIdle="${jdbc.minIdle}"
+          p:minEvictableIdleTimeMillis="${jdbc.minEvictableIdleTimeMillis}"
+          p:maxWait="${jdbc.maxWait}"
+          p:maxActive="${jdbc.maxActive}"
+    />
+    
+    <bean id="sessionFactory"  
+          class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">  
+        <property name="dataSource" ref="dataSource"></property>  
+        <property name="packagesToScan" value="cqsb.sycj.dao.impl.*"/>
+        <property name="hibernateProperties">
+            <props><!--org.hibernate.dialect.MySQL5Dialect  org.hibernate.dialect.MySQLDialect-->
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.show_sql">true</prop><!-- 显示sql语句 -->
+                <prop key="hibernate.format_sql">true</prop><!-- 规范显示sql语句 -->
+                <prop key="hibernate.hbm2ddl.auto">update</prop>   <!-- 自动建表 -->
+            </props>
+        </property>
+        </property>  
+    </bean>
+    <bean id="hibernateTmplate"  
+          class="org.springframework.orm.hibernate3.HibernateTemplate">  
+        <property name="sessionFactory" ref="sessionFactory"></property>  
+    </bean>
+    <bean id="transactionManager"  
+          class="org.springframework.orm.hibernate3.HibernateTransactionManager">  
+        <property name="sessionFactory" ref="sessionFactory"/>  
+    </bean> 
+    <tx:annotation-driven transaction-manager="transactionManager" />
+</beans>
